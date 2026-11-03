@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "updatedAt": "2026-11-03T09:00:00+09:00",
+  "notices": [
+    {
+      "id": "test-001",
+      "type": "info",
+      "priority": 1,
+      "startAt": "2026-11-03T00:00:00+09:00",
+      "endAt": "2026-12-31T23:59:59+09:00",
+      "minAppVersion": null,
+      "maxAppVersion": null,
+      "dismiss": "once",
+      "title": {
+        "ko": "테스트 공지",
+        "en": "Test notice"
+      },
+      "body": {
+        "ko": "이 공지는 공지 팝업 동작을 확인하기 위한 테스트입니다.",
+        "en": "This is a test notice to verify the notice popup."
+      },
+      "link": null
+    }
+  ]
+}
