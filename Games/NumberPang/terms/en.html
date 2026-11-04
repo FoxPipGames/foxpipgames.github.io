@@ -140,17 +140,18 @@
 
     <h1>Terms of Service</h1>
 
-    <p class="version-intro">These Terms of Service will be revised on <strong>November 11, 2026</strong>. <strong>Version 1.0.0</strong> applies now; the revision is under the <strong>Version 1.0.1</strong> tab. The document version matches the app version it first applies to.</p>
+    <p class="version-intro" data-state="before">These Terms of Service will be revised on <strong>November 11, 2026</strong>. <strong>Version 1.0.0</strong> applies now; the revision is under the <strong>Version 1.0.1</strong> tab. The document version matches the app version it first applies to.</p>
+    <p class="version-intro" data-state="after" hidden>These Terms of Service were revised on <strong>November 11, 2026</strong>. <strong>Version 1.0.1</strong> applies now; the previous text is under the <strong>Version 1.0.0</strong> tab. The document version matches the app version it first applies to.</p>
 
     <div class="versions">
-      <input type="radio" name="version" id="ver-1" checked />
-      <input type="radio" name="version" id="ver-2" />
+      <input type="radio" name="version" id="ver-1" data-version="1.0.0" data-effective="2026-10-29T00:00:00+09:00" checked />
+      <input type="radio" name="version" id="ver-2" data-version="1.0.1" data-effective="2026-11-11T00:00:00+09:00" />
       <div class="version-tabs" role="group" aria-label="Document version">
-        <label for="ver-1">Version 1.0.0 (current)<small>Effective October 29, 2026</small></label>
-        <label for="ver-2">Version 1.0.1 (upcoming)<small>Effective November 11, 2026</small></label>
+        <label for="ver-1"><span data-current="Version 1.0.0 (current)" data-previous="Version 1.0.0 (previous)">Version 1.0.0 (current)</span><small data-current="Effective October 29, 2026" data-previous="October 29 – November 10, 2026">Effective October 29, 2026</small></label>
+        <label for="ver-2"><span data-upcoming="Version 1.0.1 (upcoming)" data-current="Version 1.0.1 (current)">Version 1.0.1 (upcoming)</span><small>Effective November 11, 2026</small></label>
       </div>
 
-      <section class="version-panel" id="panel-1" aria-label="Version 1.0.0 (current)">
+      <section class="version-panel" id="panel-1" aria-label="Version 1.0.0">
 
       <div class="notice-box">
         Important provisions, including
@@ -354,7 +355,7 @@
 
       </section>
 
-      <section class="version-panel" id="panel-2" aria-label="Version 1.0.1 (upcoming)">
+      <section class="version-panel" id="panel-2" aria-label="Version 1.0.1">
       <div class="change-box">
         <p><strong>Notice of revision</strong> (announced November 4, 2026 · effective November 11, 2026)</p>
         <ul>
@@ -574,9 +575,45 @@
 
   </main>
   <script>
-    // Opening the page at #v2 (the notice links there) shows the revision.
+    // Version tabs by date: the newest version whose effective time has passed is shown first and labelled
+    // "current"; a later one is "upcoming", an earlier one "previous". #v1 / #v2 (or #1.0.0 / #1.0.1) opens that
+    // version instead. Without JavaScript the version checked in the markup is shown.
     (function () {
-      function pick() { if (location.hash === "#v2") { var r = document.getElementById("ver-2"); if (r) r.checked = true; } }
+      "use strict";
+      var inputs = Array.prototype.slice.call(document.querySelectorAll(".versions > input[data-effective]"));
+      if (!inputs.length) return;
+      var now = Date.now();
+      function eff(input) { return Date.parse(input.getAttribute("data-effective")); }
+
+      var current = null;
+      inputs.forEach(function (input) {
+        var t = eff(input);
+        if (!isNaN(t) && t <= now && (current === null || t >= eff(current))) current = input;
+      });
+      if (current === null) current = inputs[0];
+      var upcoming = inputs.some(function (input) { return eff(input) > now; });
+
+      inputs.forEach(function (input) {
+        var state = input === current ? "current" : (eff(input) > now ? "upcoming" : "previous");
+        var label = document.querySelector('label[for="' + input.id + '"]');
+        if (!label) return;
+        Array.prototype.forEach.call(label.querySelectorAll("[data-" + state + "]"), function (el) {
+          el.textContent = el.getAttribute("data-" + state);
+        });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll(".version-intro[data-state]"), function (p) {
+        p.hidden = p.getAttribute("data-state") !== (upcoming ? "before" : "after");
+      });
+
+      function pick() {
+        var h = decodeURIComponent(location.hash.replace(/^#/, ""));
+        var chosen = null;
+        inputs.forEach(function (input, i) {
+          var v = input.getAttribute("data-version");
+          if (h === "v" + (i + 1) || h === v || h === "v" + v) chosen = input;
+        });
+        (chosen || current).checked = true;
+      }
       pick();
       window.addEventListener("hashchange", pick);
     })();

@@ -143,14 +143,14 @@
     <p class="version-intro">개인정보처리방침이 <strong>2026년 11월 4일</strong>에 개정되었습니다. 지금 적용되는 것은 <strong>버전 1.0.1</strong>이며, 이전 내용은 <strong>버전 1.0.0</strong> 탭에서 볼 수 있습니다. 문서 버전은 그 내용이 처음 적용되는 앱 버전과 같습니다.</p>
 
     <div class="versions">
-      <input type="radio" name="version" id="ver-1" />
-      <input type="radio" name="version" id="ver-2" checked />
+      <input type="radio" name="version" id="ver-1" data-version="1.0.0" data-effective="2026-10-29T00:00:00+09:00" />
+      <input type="radio" name="version" id="ver-2" data-version="1.0.1" data-effective="2026-11-04T00:00:00+09:00" checked />
       <div class="version-tabs" role="group" aria-label="문서 버전">
-        <label for="ver-1">버전 1.0.0 (이전 버전)<small>2026년 10월 29일 ~ 11월 3일</small></label>
-        <label for="ver-2">버전 1.0.1 (현행)<small>2026년 11월 4일 시행</small></label>
+        <label for="ver-1"><span data-current="버전 1.0.0 (현행)" data-previous="버전 1.0.0 (이전 버전)">버전 1.0.0 (이전 버전)</span><small data-current="2026년 10월 29일 시행" data-previous="2026년 10월 29일 ~ 11월 3일">2026년 10월 29일 ~ 11월 3일</small></label>
+        <label for="ver-2"><span data-upcoming="버전 1.0.1 (개정 예정)" data-current="버전 1.0.1 (현행)">버전 1.0.1 (현행)</span><small>2026년 11월 4일 시행</small></label>
       </div>
 
-      <section class="version-panel" id="panel-1" aria-label="버전 1.0.0 (이전 버전)">
+      <section class="version-panel" id="panel-1" aria-label="버전 1.0.0">
       <p>
         폭스핍(FoxPip)(이하 "개발자")은 모바일 게임 「넘버 팡 : 머지 슈터」(이하 "서비스")을 이용하는 이용자의 개인정보를 중요하게 생각하며, 「개인정보 보호법」 등 관련 법령을 준수합니다. 이 방침은 서비스에서 어떤 정보가 어떻게 처리되는지, 이용자가 어떤 선택을 할 수 있는지를 안내합니다.
       </p>
@@ -337,7 +337,7 @@
 
       </section>
 
-      <section class="version-panel" id="panel-2" aria-label="버전 1.0.1 (현행)">
+      <section class="version-panel" id="panel-2" aria-label="버전 1.0.1">
       <div class="change-box">
         <p><strong>개정 안내</strong> (공지·시행 2026년 11월 4일)</p>
         <ul>
@@ -553,9 +553,45 @@
 
   </main>
   <script>
-    // Opening the page at #v2 (the notice links there) shows the revision.
+    // Version tabs by date: the newest version whose effective time has passed is shown first and labelled
+    // "current"; a later one is "upcoming", an earlier one "previous". #v1 / #v2 (or #1.0.0 / #1.0.1) opens that
+    // version instead. Without JavaScript the version checked in the markup is shown.
     (function () {
-      function pick() { if (location.hash === "#v2") { var r = document.getElementById("ver-2"); if (r) r.checked = true; } }
+      "use strict";
+      var inputs = Array.prototype.slice.call(document.querySelectorAll(".versions > input[data-effective]"));
+      if (!inputs.length) return;
+      var now = Date.now();
+      function eff(input) { return Date.parse(input.getAttribute("data-effective")); }
+
+      var current = null;
+      inputs.forEach(function (input) {
+        var t = eff(input);
+        if (!isNaN(t) && t <= now && (current === null || t >= eff(current))) current = input;
+      });
+      if (current === null) current = inputs[0];
+      var upcoming = inputs.some(function (input) { return eff(input) > now; });
+
+      inputs.forEach(function (input) {
+        var state = input === current ? "current" : (eff(input) > now ? "upcoming" : "previous");
+        var label = document.querySelector('label[for="' + input.id + '"]');
+        if (!label) return;
+        Array.prototype.forEach.call(label.querySelectorAll("[data-" + state + "]"), function (el) {
+          el.textContent = el.getAttribute("data-" + state);
+        });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll(".version-intro[data-state]"), function (p) {
+        p.hidden = p.getAttribute("data-state") !== (upcoming ? "before" : "after");
+      });
+
+      function pick() {
+        var h = decodeURIComponent(location.hash.replace(/^#/, ""));
+        var chosen = null;
+        inputs.forEach(function (input, i) {
+          var v = input.getAttribute("data-version");
+          if (h === "v" + (i + 1) || h === v || h === "v" + v) chosen = input;
+        });
+        (chosen || current).checked = true;
+      }
       pick();
       window.addEventListener("hashchange", pick);
     })();
