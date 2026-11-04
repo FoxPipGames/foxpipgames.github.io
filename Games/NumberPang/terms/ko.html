@@ -132,6 +132,11 @@
     .change-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 16px 20px; margin: 20px 0; }
     .change-box ul { margin: 8px 0; }
     .version-intro { color: #444; }
+    @media (max-width: 520px) {
+      .version-tabs { flex-wrap: nowrap; gap: 6px; }
+      .version-tabs label { flex: 1 1 0; min-width: 0; padding: 8px 10px; font-size: 15px; word-break: keep-all; }
+      .version-tabs label small { font-size: 12px; }
+    }
   </style>
 </head>
 
