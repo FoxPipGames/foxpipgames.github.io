@@ -7,7 +7,7 @@
       "type": "info",
       "priority": 1,
       "startAt": "2026-11-04T00:00:00+09:00",
-      "endAt": "2026-12-31T23:59:59+09:00",
+      "endAt": "2026-11-18T23:59:59+09:00",
       "minAppVersion": null,
       "maxAppVersion": null,
       "dismiss": "once",
